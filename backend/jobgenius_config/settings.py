@@ -25,7 +25,14 @@ SECRET_KEY = "django-insecure-1skkb65s7qx!3!&kfrvznwhdbf941)syql2)s-17^11&jo$w-k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # For development access
+
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = True # Broaden for initial dev testing
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React frontend
+    "http://localhost:5173",  # Vite dev server
+]
 
 
 # Application definition

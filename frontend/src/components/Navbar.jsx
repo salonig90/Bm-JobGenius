@@ -1,23 +1,41 @@
 import React from 'react'
-import logo from '../assets/logo.png'
+import { Link, useLocation } from 'react-router-dom'
+import Logo from './Logo'
 
-const Navbar = ({ isAuthenticated, onLogout, onLoginClick, onSignupClick }) => {
+const Navbar = ({ isAuthenticated, onLogout, onLoginClick, onSignupClick, onDashboardClick, onLogoClick }) => {
+  const location = useLocation();
+
   return (
     <nav className="navbar animate-fade-in">
       <div className="navbar-content">
         <div className="navbar-left">
-          <div className="nav-logo-container">
-            <img src={logo} alt="JobGenius Logo" className="nav-logo" />
+          <Link to="/" className="nav-logo-container" style={{ textDecoration: 'none' }}>
+            <Logo size={40} className="nav-logo" />
             <span className="nav-brand-name">JobGenius</span>
-          </div>
+          </Link>
+        </div>
+
+        <div className="navbar-center">
+          <ul className="nav-links">
+            <li>
+              <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/upload" className={`nav-link ${location.pathname === '/upload' ? 'active' : ''}`}>
+                Upload Resume
+              </Link>
+            </li>
+            <li>
+              <Link to="/dashboard" className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
+                Dashboard
+              </Link>
+            </li>
+          </ul>
         </div>
         
         <div className="navbar-right">
-          <ul className="nav-links">
-            <li><a href="#features" className="nav-link">Features</a></li>
-            <li><a href="#about" className="nav-link">About</a></li>
-          </ul>
-          
           <div className="nav-actions">
             {isAuthenticated ? (
               <div className="user-profile">

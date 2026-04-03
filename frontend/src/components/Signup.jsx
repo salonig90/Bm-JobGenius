@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import logo from '../assets/logo.png'
+import Logo from './Logo'
 
 
 const Signup = ({ onSignupSuccess, onBackToLogin, onCancel }) => {
@@ -70,11 +70,11 @@ const Signup = ({ onSignupSuccess, onBackToLogin, onCancel }) => {
 
   return (
     <div className="login-overlay">
-      <div className="login-card signup-card animate-fade-in">
+      <div className="login-card animate-fade-in">
         <div className="login-header">
-          <img src={logo} alt="JobGenius Logo" className="auth-logo" />
-          <h2>Create Your Account</h2>
-          <p>Join the genius community today.</p>
+          <Logo size={64} className="auth-logo" />
+          <h2>Create Account</h2>
+          <p>Join JobGenius and transform your career.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">

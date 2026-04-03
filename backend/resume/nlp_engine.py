@@ -23,8 +23,16 @@ class NLPEngine:
         # A list of common tech skills to look for
         # In a real app, this would be a much larger database or loaded from a file
         self.skills_db = [
+            # User Requested Skills
+            'Python', 'PL/SQL', 'Shell Scripting', 'Bash', 'Prisma Schema Language', 'Deluge',
+            'AWS', 'Azure', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Git', 'GitHub', 
+            'GitHub Action', 'Grafana', 'AWS RDS', 'EMR', 'AWS S3', 'ETL', 'Databricks', 
+            'Data Factory', 'Fabric', 'PySpark', 'NumPy', 'Pandas', 'MySQL', 'MongoDB', 
+            'SQLite', 'Supabase', 'Linux', 'Ubuntu', 'Windows', 'IntelliJ IDEA', 'VS Code', 
+            'Jupyter Notebook', 'AWS CLI', 'Postman',
+
             # Programming Languages
-            'Python', 'Java', 'Javascript', 'C++', 'C#', 'PHP', 'Ruby', 'Swift', 'Go', 'Kotlin', 'Rust', 'R',
+            'Java', 'Javascript', 'C++', 'C#', 'PHP', 'Ruby', 'Swift', 'Go', 'Kotlin', 'Rust', 'R',
             
             # Frontend
             'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte', 'Tailwind CSS', 'Bootstrap', 'Redux', 'Webpack',
@@ -33,13 +41,13 @@ class NLPEngine:
             'Django', 'Flask', 'FastAPI', 'Node.js', 'Express', 'Spring Boot', 'Laravel', 'Rails', 'ASP.NET',
             
             # Database
-            'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Oracle', 'SQLite', 'MariaDB', 'DynamoDB',
+            'SQL', 'PostgreSQL', 'Redis', 'Oracle', 'MariaDB', 'DynamoDB',
             
             # Cloud & DevOps
-            'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Jenkins', 'Git', 'GitHub', 'CI/CD', 'Terraform', 'Ansible',
+            'GCP', 'CI/CD', 'Ansible',
             
             # AI & Data Science
-            'Machine Learning', 'Deep Learning', 'AI', 'NLP', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'Pandas', 'NumPy',
+            'Machine Learning', 'Deep Learning', 'AI', 'NLP', 'TensorFlow', 'PyTorch', 'Scikit-learn',
             'Data Analysis', 'Data Visualization', 'Tableau', 'Power BI', 'Spark', 'Hadoop',
             
             # Others
@@ -49,7 +57,14 @@ class NLPEngine:
         
         self.matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
         # Prepare patterns for matching
-        patterns = [nlp.make_doc(skill) for skill in self.skills_db]
+        # Clean the skill strings to ensure better matching (handling special characters like 'Ac on')
+        cleaned_skills = []
+        for skill in self.skills_db:
+            # Handle potential copy-paste artifacts like "Ac on" for "Action"
+            cleaned_skill = skill.replace('Ac on', 'Action').replace('Scrip ng', 'Scripting')
+            cleaned_skills.append(cleaned_skill)
+            
+        patterns = [nlp.make_doc(skill) for skill in cleaned_skills]
         self.matcher.add("SKILLS", patterns)
 
     def extract_text_from_pdf(self, pdf_path):
