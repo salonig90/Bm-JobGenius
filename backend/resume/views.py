@@ -4,7 +4,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status, generics
 from .serializers import ResumeSerializer, UserRegistrationSerializer
 from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .nlp_engine import engine
 from .ml_scorer import scorer
 
@@ -37,13 +38,14 @@ class ResumeUploadView(APIView):
     API endpoint for uploading resume files and triggering AI analysis.
     """
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = (AllowAny,)
-    authentication_classes = [] # Disable auth for this endpoint to prevent token errors during dev
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
 
     def post(self, request, *args, **kwargs):
         serializer = ResumeSerializer(data=request.data)
         if serializer.is_valid():
-            resume_instance = serializer.save()
+            # Link to authenticated user
+            resume_instance = serializer.save(user=request.user)
             
             # Analysis pipeline
             results = {"skills": []}
@@ -92,3 +94,34 @@ class ResumeUploadView(APIView):
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserResumeDetailView(APIView):
+    """
+    Fetch the latest resume and analysis for the authenticated user.
+    """
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
+
+    def get(self, request):
+        resume = Resume.objects.filter(user=request.user).order_by('-uploaded_at').first()
+        if not resume:
+            return Response({"message": "No resume found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Determine score label
+        score = resume.compatibility_score
+        if score >= 80:
+            score_label = "Excellent"
+        elif score >= 60:
+            score_label = "Good"
+        elif score >= 40:
+            score_label = "Average"
+        else:
+            score_label = "Needs Improvement"
+
+        return Response({
+            "data": ResumeSerializer(resume).data,
+            "extracted_skills": resume.extracted_skills.split(", ") if resume.extracted_skills else [],
+            "match_score": resume.compatibility_score,
+            "score": resume.compatibility_score,
+            "score_label": score_label
+        }, status=status.HTTP_200_OK)

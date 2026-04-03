@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import AnalysisResults from './AnalysisResults';
 import JobRecommendations from './JobRecommendations';
 
@@ -9,13 +10,21 @@ const Dashboard = ({ analysisData, onReset }) => {
         <header className="dashboard-header">
           <div className="dashboard-header-top">
             <h1>Your AI Career Dashboard</h1>
-            <button className="reset-analysis-btn" onClick={onReset}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M23 4v6h-4"></path>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-              </svg>
-              Analyze New Resume
-            </button>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <Link to="/ai-suggest" className="ai-suggest-btn" style={{ textDecoration: 'none' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+                </svg>
+                AI Suggestions
+              </Link>
+              <button className="reset-analysis-btn" onClick={onReset}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M23 4v6h-4"></path>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                Analyze New Resume
+              </button>
+            </div>
           </div>
           <p>Real-time analysis and job matching based on your profile.</p>
         </header>
@@ -101,6 +110,26 @@ const Dashboard = ({ analysisData, onReset }) => {
           gap: 10px;
           font-weight: 600;
           transition: all 0.3s ease;
+        }
+
+        .ai-suggest-btn {
+          background: linear-gradient(135deg, #fb2576 0%, #332fd0 100%);
+          border: none;
+          color: #fff;
+          padding: 0.8rem 1.5rem;
+          border-radius: 99rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 0 15px rgba(251, 37, 118, 0.3);
+        }
+
+        .ai-suggest-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 20px rgba(251, 37, 118, 0.5);
         }
 
         .reset-analysis-btn:hover {

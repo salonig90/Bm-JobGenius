@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 
 class Resume(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resumes', null=True, blank=True)
     file = models.FileField(
         upload_to='resumes/',
         validators=[FileExtensionValidator(allowed_extensions=['pdf', 'docx'])]

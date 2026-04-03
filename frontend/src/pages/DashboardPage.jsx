@@ -7,10 +7,12 @@ const DashboardPage = ({ isAuthenticated, onAnalyzeClick, analysisData, setAnaly
 
   const handleReset = () => {
     setAnalysisData({
+      resumeId: null,
       matchScore: 0,
       scoreLabel: '',
       extractedSkills: [],
       jobRecommendations: [],
+      aiSuggestions: null, // Clear AI suggestions on reset
       isFetchingJobs: false,
       resumeName: ''
     });

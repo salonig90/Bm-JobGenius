@@ -70,10 +70,12 @@ const AnalysisDashboard = ({ isAuthenticated, onAnalyzeClick, onUploadSuccess, f
         setUploadStatus('success');
         setAnalysisData(prev => ({
           ...prev,
+          resumeId: result.data.id || null,
           extractedSkills: result.extracted_skills || [],
           matchScore: result.score || 0,
           scoreLabel: result.score_label || '',
-          resumeName: uploadedFileName
+          resumeName: uploadedFileName,
+          aiSuggestions: null // Clear previous suggestions when new resume is uploaded
         }));
         setFile(null);
         onUploadSuccess(); // Navigate to dashboard immediately after resume analysis

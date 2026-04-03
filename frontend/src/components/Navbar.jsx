@@ -32,6 +32,11 @@ const Navbar = ({ isAuthenticated, onLogout, onLoginClick, onSignupClick, onDash
                 Dashboard
               </Link>
             </li>
+            <li>
+              <Link to="/ai-suggest" className={`nav-link ${location.pathname === '/ai-suggest' ? 'active' : ''}`}>
+                AI Suggest
+              </Link>
+            </li>
           </ul>
         </div>
         

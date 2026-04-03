@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import DashboardPage from './pages/DashboardPage';
 import UploadResumePage from './pages/UploadResumePage';
+import AISuggestPage from './pages/AISuggestPage';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -16,14 +17,23 @@ function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [pendingRedirect, setPendingRedirect] = useState(null);
-  const [analysisData, setAnalysisData] = useState({
-    matchScore: 0,
-    scoreLabel: '',
-    extractedSkills: [],
-    jobRecommendations: [],
-    isFetchingJobs: false,
-    resumeName: ''
+  const [analysisData, setAnalysisData] = useState(() => {
+    const savedData = localStorage.getItem('analysis_data');
+    return savedData ? JSON.parse(savedData) : {
+      resumeId: null,
+      matchScore: 0,
+      scoreLabel: '',
+      extractedSkills: [],
+      jobRecommendations: [],
+      aiSuggestions: null,
+      isFetchingJobs: false,
+      resumeName: ''
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem('analysis_data', JSON.stringify(analysisData));
+  }, [analysisData]);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -35,14 +45,53 @@ function AppContent() {
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('analysis_data');
     setIsAuthenticated(false);
+    setAnalysisData({
+      resumeId: null,
+      matchScore: 0,
+      scoreLabel: '',
+      extractedSkills: [],
+      jobRecommendations: [],
+      aiSuggestions: null,
+      isFetchingJobs: false,
+      resumeName: ''
+    });
     navigate('/');
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = async () => {
     setIsAuthenticated(true);
     setShowLogin(false);
     setShowSignup(false);
+
+    // Fetch user's saved resume data
+    try {
+      const response = await fetch('http://localhost:8000/api/resume/my-resume/', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setAnalysisData({
+          resumeId: result.data.id || null,
+          extractedSkills: result.extracted_skills || [],
+          matchScore: result.score || 0,
+          scoreLabel: result.score_label || '',
+          resumeName: result.data.file ? result.data.file.split('/').pop() : 'Saved Resume',
+          jobRecommendations: [],
+          aiSuggestions: null,
+          isFetchingJobs: false
+        });
+        
+        if (result.data.id) {
+          fetchJobRecommendations(result.data.id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch saved resume:', error);
+    }
     
     if (pendingRedirect) {
       navigate(pendingRedirect);
@@ -141,6 +190,16 @@ function AppContent() {
               <DashboardPage 
                 isAuthenticated={isAuthenticated}
                 onAnalyzeClick={handleAnalyzeResume}
+                analysisData={analysisData}
+                setAnalysisData={setAnalysisData}
+              />
+            } 
+          />
+          <Route 
+            path="/ai-suggest" 
+            element={
+              <AISuggestPage 
+                isAuthenticated={isAuthenticated}
                 analysisData={analysisData}
                 setAnalysisData={setAnalysisData}
               />
