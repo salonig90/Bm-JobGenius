@@ -5,14 +5,20 @@ from docx import Document
 import re
 import os
 
-# Load the spaCy model (small English pipeline)
-try:
-    nlp = spacy.load("en_core_web_sm")
-except:
-    # If not loaded, we can download it or handle the error
-    import subprocess
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-    nlp = spacy.load("en_core_web_sm")
+# Global NLP variable
+_nlp_instance = None
+
+def get_nlp():
+    global _nlp_instance
+    if _nlp_instance is None:
+        import spacy
+        try:
+            _nlp_instance = spacy.load("en_core_web_sm")
+        except:
+            import subprocess
+            subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+            _nlp_instance = spacy.load("en_core_web_sm")
+    return _nlp_instance
 
 class NLPEngine:
     """
@@ -21,51 +27,33 @@ class NLPEngine:
     
     def __init__(self):
         # A list of common tech skills to look for
-        # In a real app, this would be a much larger database or loaded from a file
         self.skills_db = [
-            # User Requested Skills
             'Python', 'PL/SQL', 'Shell Scripting', 'Bash', 'Prisma Schema Language', 'Deluge',
             'AWS', 'Azure', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Git', 'GitHub', 
             'GitHub Action', 'Grafana', 'AWS RDS', 'EMR', 'AWS S3', 'ETL', 'Databricks', 
             'Data Factory', 'Fabric', 'PySpark', 'NumPy', 'Pandas', 'MySQL', 'MongoDB', 
             'SQLite', 'Supabase', 'Linux', 'Ubuntu', 'Windows', 'IntelliJ IDEA', 'VS Code', 
             'Jupyter Notebook', 'AWS CLI', 'Postman',
-
-            # Programming Languages
             'Java', 'Javascript', 'C++', 'C#', 'PHP', 'Ruby', 'Swift', 'Go', 'Kotlin', 'Rust', 'R',
-            
-            # Frontend
             'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte', 'Tailwind CSS', 'Bootstrap', 'Redux', 'Webpack',
-            
-            # Backend & Frameworks
             'Django', 'Flask', 'FastAPI', 'Node.js', 'Express', 'Spring Boot', 'Laravel', 'Rails', 'ASP.NET',
-            
-            # Database
             'SQL', 'PostgreSQL', 'Redis', 'Oracle', 'MariaDB', 'DynamoDB',
-            
-            # Cloud & DevOps
             'GCP', 'CI/CD', 'Ansible',
-            
-            # AI & Data Science
             'Machine Learning', 'Deep Learning', 'AI', 'NLP', 'TensorFlow', 'PyTorch', 'Scikit-learn',
             'Data Analysis', 'Data Visualization', 'Tableau', 'Power BI', 'Spark', 'Hadoop',
-            
-            # Others
             'GraphQL', 'REST API', 'Microservices', 'Agile', 'Scrum', 'Figma', 'UI/UX', 'SEO', 'Mobile Development',
             'SwiftUI', 'Flutter', 'React Native', 'Firebase', 'Solidity', 'Blockchain'
         ]
-        
-        self.matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
-        # Prepare patterns for matching
-        # Clean the skill strings to ensure better matching (handling special characters like 'Ac on')
-        cleaned_skills = []
-        for skill in self.skills_db:
-            # Handle potential copy-paste artifacts like "Ac on" for "Action"
-            cleaned_skill = skill.replace('Ac on', 'Action').replace('Scrip ng', 'Scripting')
-            cleaned_skills.append(cleaned_skill)
-            
-        patterns = [nlp.make_doc(skill) for skill in cleaned_skills]
-        self.matcher.add("SKILLS", patterns)
+        self.matcher = None
+
+    def _get_matcher(self):
+        if self.matcher is None:
+            from spacy.matcher import PhraseMatcher
+            nlp = get_nlp()
+            self.matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
+            patterns = [nlp.make_doc(skill) for skill in self.skills_db]
+            self.matcher.add("SKILLS", patterns)
+        return self.matcher
 
     def extract_text_from_pdf(self, pdf_path):
         """Extracts text from a PDF file."""
@@ -95,8 +83,10 @@ class NLPEngine:
         Uses spaCy PhraseMatcher to find relevant skills in the text.
         Returns a list of unique found skills.
         """
+        nlp = get_nlp()
         doc = nlp(text)
-        matches = self.matcher(doc)
+        matcher = self._get_matcher()
+        matches = matcher(doc)
         
         found_skills = set()
         for match_id, start, end in matches:

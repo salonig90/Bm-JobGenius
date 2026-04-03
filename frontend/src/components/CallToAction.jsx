@@ -20,7 +20,7 @@ const CallToAction = ({ onAnalyzeClick }) => {
 
       <style jsx>{`
         .cta-section {
-          padding: 80px 20px 140px;
+          padding: 60px 20px 80px;
           max-width: 1200px;
           margin: 0 auto;
           width: 100%;
@@ -31,7 +31,7 @@ const CallToAction = ({ onAnalyzeClick }) => {
           background: linear-gradient(135deg, rgba(251, 37, 118, 0.1) 0%, rgba(51, 47, 208, 0.1) 100%);
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 40px;
-          padding: 80px 40px;
+          padding: 60px 40px;
           text-align: center;
           overflow: hidden;
           box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);

@@ -28,10 +28,12 @@ DEBUG = True
 ALLOWED_HOSTS = ['*'] # For development access
 
 # CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True # Broaden for initial dev testing
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React frontend
-    "http://localhost:5173",  # Vite dev server
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 
@@ -86,9 +88,8 @@ TEMPLATES = [
 WSGI_APPLICATION = "jobgenius_config.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
+# Default Database (SQLite3)
+# Note: Using sqlite3-binary is not necessary for most environments as it's built-in to Python
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -133,11 +134,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-# CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React frontend
-    "http://localhost:5173",  # Vite dev server
-]
 
 # REST Framework Settings
 REST_FRAMEWORK = {

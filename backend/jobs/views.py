@@ -49,6 +49,7 @@ class JobRecommendationView(APIView):
             live_jobs = []
             try:
                 # Always force location to India as per user requirement
+                # Increased results_count to ensure we get a diverse set from all sources
                 live_jobs = fetcher.fetch_live_jobs(
                     search_term=search_query,
                     location="India",
@@ -93,11 +94,11 @@ class JobRecommendationView(APIView):
                     "message": "No jobs found at this moment. Please check back later."
                 }, status=status.HTTP_200_OK)
 
-            # Step 5: Score jobs against resume using TF-IDF recommender
+            # Step 5: Score jobs against resume using vector search
             scored_jobs = recommender.score_live_jobs(
                 resume_text=resume_instance.full_text,
                 live_jobs=live_jobs,
-                top_n=30
+                top_n=40 # Return more recommendations
             )
 
             return Response({

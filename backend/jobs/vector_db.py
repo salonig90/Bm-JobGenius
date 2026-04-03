@@ -12,25 +12,25 @@ class VectorDB:
     
     def __init__(self, collection_name="job_listings"):
         # Initialize ChromaDB client with persistent storage
-        db_path = os.path.join(os.path.dirname(__file__), 'chroma_db')
-        self.client = chromadb.PersistentClient(path=db_path)
-        
-        # Initialize the embedding model
-        # Using a lightweight, high-performance model suitable for job descriptions
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
-        
-        # Get or create the collection
-        self.collection = self.client.get_or_create_collection(
-            name=collection_name,
-            metadata={"hnsw:space": "cosine"} # Use cosine similarity
-        )
+        self.db_path = os.path.join(os.path.dirname(__file__), 'chroma_db')
+        self.collection_name = collection_name
+        self.client = None
+        self.model = None
+        self.collection = None
+
+    def _ensure_initialized(self):
+        if self.client is None:
+            import chromadb
+            from sentence_transformers import SentenceTransformer
+            self.client = chromadb.PersistentClient(path=self.db_path)
+            self.model = SentenceTransformer('all-MiniLM-L6-v2')
+            self.collection = self.client.get_or_create_collection(
+                name=self.collection_name,
+                metadata={"hnsw:space": "cosine"}
+            )
 
     def add_jobs(self, jobs):
-        """
-        Converts job descriptions to vectors and stores them in ChromaDB.
-        Args:
-            jobs (list): List of job dicts from job_fetcher.
-        """
+        self._ensure_initialized()
         if not jobs:
             return
 
@@ -40,10 +40,7 @@ class VectorDB:
         
         for job in jobs:
             # Create a rich text representation for embedding
-            # Including title and company helps with context
             content = f"Title: {job.get('title', '')}. Company: {job.get('company', '')}. Description: {job.get('description', '')}"
-            
-            # Use job URL as ID if available, otherwise generate a UUID
             job_id = job.get('job_url') or str(uuid.uuid4())
             
             documents.append(content)
@@ -68,13 +65,9 @@ class VectorDB:
         )
 
     def search_similar_jobs(self, query_text, n_results=30):
+        self._ensure_initialized()
         """
         Converts query to vector and searches for similar jobs in ChromaDB.
-        Args:
-            query_text (str): The text to search for (e.g., resume text).
-            n_results (int): Number of top results to return.
-        Returns:
-            list: Formatted job recommendations.
         """
         # Generate embedding for the query
         query_embedding = self.model.encode([query_text]).tolist()
@@ -84,6 +77,7 @@ class VectorDB:
             query_embeddings=query_embedding,
             n_results=n_results
         )
+        # ... (rest of logic)
 
         formatted_results = []
         
@@ -110,6 +104,7 @@ class VectorDB:
 
     def clear_collection(self):
         """Removes all items from the collection."""
+        self._ensure_initialized()
         ids = self.collection.get()['ids']
         if ids:
             self.collection.delete(ids=ids)

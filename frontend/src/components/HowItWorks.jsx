@@ -64,7 +64,7 @@ const HowItWorks = () => {
 
       <style jsx>{`
         .how-it-works-section {
-          padding: 120px 20px;
+          padding: 60px 20px;
           max-width: 1200px;
           margin: 0 auto;
           width: 100%;
@@ -73,8 +73,8 @@ const HowItWorks = () => {
         .steps-container {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 40px;
-          margin-top: 60px;
+          gap: 30px;
+          margin-top: 40px;
           position: relative;
         }
 

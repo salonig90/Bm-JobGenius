@@ -33,8 +33,12 @@ class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
 
 class ResumeUploadView(APIView):
+    """
+    API endpoint for uploading resume files and triggering AI analysis.
+    """
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = (AllowAny,)
+    authentication_classes = [] # Disable auth for this endpoint to prevent token errors during dev
 
     def post(self, request, *args, **kwargs):
         serializer = ResumeSerializer(data=request.data)
@@ -43,6 +47,7 @@ class ResumeUploadView(APIView):
             
             # Analysis pipeline
             results = {"skills": []}
+            score_label = "Pending" # Default label
             
             try:
                 # 1. NLP: Extract skills and text
