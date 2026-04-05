@@ -2,7 +2,6 @@
 
 JobGenius is a sophisticated, AI-driven career intelligence platform that helps professionals optimize their resumes and discover the best-fitting job opportunities. By leveraging **Google Gemini AI** and **Semantic Vector Search**, JobGenius provides deep technical insights, actionable career advice, and hyper-relevant job matches from live sources.
 
-![JobGenius Logo](frontend/src/assets/logo.png)
 
 ## 🌟 Key Features
 
