@@ -26,6 +26,7 @@ const Login = ({ onLoginSuccess, onSignupClick, onCancel }) => {
         const data = await response.json()
         localStorage.setItem('access_token', data.access)
         localStorage.setItem('refresh_token', data.refresh)
+        localStorage.setItem('username', username) // Save username
         onLoginSuccess()
       } else {
         const data = await response.json()

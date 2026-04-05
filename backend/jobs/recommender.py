@@ -9,7 +9,7 @@ class JobRecommender:
     def __init__(self):
         pass
 
-    def score_live_jobs(self, resume_text, live_jobs, top_n=30):
+    def score_live_jobs(self, resume_text, live_jobs, top_n=10):
         """
         Refactored to use ChromaDB vector search.
         

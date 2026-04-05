@@ -76,19 +76,48 @@ class GeminiAdvisor:
         Avoid suggestions about minor formatting or moving text around. Focus purely on TECHNICAL DEPTH and IMPACT.
         
         Format each suggestion EXACTLY like this:
-        1. **Title**: A meaningful, specific explanation that is exactly 2 to 3 lines long.
-        2. **Title**: A meaningful, specific explanation that is exactly 2 to 3 lines long.
+        1. **Title**: Full description here in the same paragraph.
         
-        Provide 5-7 such points.
+        Provide exactly 5 to 6 such points.
         Return the suggestions as a numbered list. 
-        CRITICAL: Each explanation must be complete and fit within 2-3 lines. Do not use more than 3 lines.
+        CRITICAL: Each numbered point MUST be a single paragraph. 
+        Do NOT use bullet points or newlines inside a suggestion.
+        The Title must be in bold (**Title**) followed by a colon and the description.
+        Example:
+        1. **Quantify Impact**: Instead of saying "worked on SQL", specify that you "Optimized complex SQL queries, reducing database response time by 30% for high-volume transactions."
+        
         Do not include an introduction, a conclusion, or a title.
         """
 
         try:
             response = self.model.generate_content(prompt)
-            # Split by lines and clean up, keeping the numbered format if present
-            suggestions = [s.strip() for s in response.text.split('\n') if s.strip()]
+            raw_text = response.text
+            
+            # Smart parsing to group lines belonging to the same numbered point
+            suggestions = []
+            current_suggestion = ""
+            
+            for line in raw_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                
+                # If line starts with a number (e.g., "1. "), it's a new point
+                import re
+                if re.match(r'^\d+\.', line):
+                    if current_suggestion:
+                        suggestions.append(current_suggestion)
+                    current_suggestion = line
+                else:
+                    # If it doesn't start with a number, it's a continuation of the previous point
+                    if current_suggestion:
+                        current_suggestion += " " + line
+                    else:
+                        current_suggestion = line
+            
+            if current_suggestion:
+                suggestions.append(current_suggestion)
+                
             return suggestions
         except Exception as e:
             print(f"[GeminiAdvisor] Error: {str(e)}")

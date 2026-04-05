@@ -19,21 +19,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         full_name = validated_data.pop('full_name', '')
         phone_number = validated_data.pop('phone_number', '')
         
-        # Split name into first and last
-        name_parts = full_name.strip().split(' ', 1)
-        first_name = name_parts[0]
-        last_name = name_parts[1] if len(name_parts) > 1 else ''
-        
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
-            password=validated_data['password'],
-            first_name=first_name,
-            last_name=last_name
+            password=validated_data['password']
         )
         
-        # Create UserProfile to store the phone number
-        UserProfile.objects.create(user=user, phone_number=phone_number)
+        # Create UserProfile to store the full name and phone number
+        UserProfile.objects.create(user=user, full_name=full_name, phone_number=phone_number)
         
         return user
 

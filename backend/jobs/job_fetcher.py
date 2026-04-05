@@ -8,61 +8,48 @@ class JobFetcher:
     Supports India, Global and Remote job discovery.
     """
 
-    def fetch_live_jobs(self, search_term, location="India", results_count=30):
+    def fetch_live_jobs(self, search_term, location="India", results_count=10):
         """
         Scrapes jobs from major boards and returns them as a list of dicts.
-        Restricted to Indian jobs only from LinkedIn, Indeed, Glassdoor, and Google.
+        Optimized to fetch from both Google and LinkedIn in a single call.
         """
         all_jobs = []
         
-        # Site priority list - focusing on India-friendly sites
-        # We fetch from each site individually to ensure failure in one doesn't stop others
-        sites = ["linkedin", "google", "indeed", "glassdoor"]
+        # We pass both sites in a single list to let the library handle load balancing
+        sites = ["google", "linkedin"]
 
-        for site in sites:
-            try:
-                print(f"JobSpy: Fetching from {site} for '{search_term}' in {location}...")
+        try:
+            print(f"JobSpy: Fetching from {sites} for '{search_term}' in {location}...")
+            
+            jobs = scrape_jobs(
+                site_name=sites,
+                search_term=search_term,
+                location=location,
+                results_wanted=results_count, 
+                hours_old=168, # Last 7 days
+                country_shortcut="india", # Force India focus
+                linkedin_fetch_description=False # Speeds up LinkedIn fetching
+            )
+            
+            if isinstance(jobs, pd.DataFrame) and not jobs.empty:
+                # Clean and format the data
+                jobs = jobs.where(pd.notnull(jobs), None)
+                all_jobs = jobs.to_dict('records')
+                print(f"JobSpy: Total fetched {len(all_jobs)} jobs across sites")
+            else:
+                print(f"JobSpy: No jobs found across {sites}")
                 
-                # Fetch more than requested per site to ensure we have plenty of variety
-                # results_count is the TOTAL we want across all sites, but we fetch up to results_count PER site
-                # to maximize the chance of getting a good 20-30 total.
-                jobs = scrape_jobs(
-                    site_name=[site],
-                    search_term=search_term,
-                    location=location,
-                    results_wanted=results_count, 
-                    hours_old=168, # Last 7 days
-                    country_shortcut="india", # Force India focus
-                    linkedin_fetch_description=(site == "linkedin")
-                )
-                
-                if isinstance(jobs, pd.DataFrame) and not jobs.empty:
-                    # Clean and format the data
-                    jobs = jobs.where(pd.notnull(jobs), None) # Convert NaN to None for JSON
-                    jobs_dict = jobs.to_dict('records')
-                    
-                    # Track source site
-                    for j in jobs_dict:
-                        j['site'] = site
-                    
-                    all_jobs.extend(jobs_dict)
-                    print(f"JobSpy {site}: fetched {len(jobs_dict)} jobs")
-                else:
-                    print(f"JobSpy {site}: No jobs found or returned empty.")
-                    
-            except Exception as e:
-                print(f"JobSpy {site} fetch failed: {str(e)}")
+        except Exception as e:
+            print(f"JobSpy fetch failed: {str(e)}")
 
-        # Deduplicate jobs by URL or ID if possible
+        # Deduplicate jobs
         unique_jobs = {}
         for job in all_jobs:
-            # Use job_url or a combination of title/company as key
             job_id = job.get('job_url') or f"{job.get('title')}-{job.get('company')}"
             if job_id not in unique_jobs:
                 unique_jobs[job_id] = job
 
         final_jobs = list(unique_jobs.values())
-        print(f"JobFetcher total: {len(final_jobs)} unique live jobs fetched from India across all sites")
         return final_jobs
 
 # Singleton instance

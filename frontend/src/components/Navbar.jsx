@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import Logo from './Logo'
 
-const Navbar = ({ isAuthenticated, onLogout, onLoginClick, onSignupClick, onDashboardClick, onLogoClick }) => {
+const Navbar = ({ isAuthenticated, username, onLogout, onLoginClick, onSignupClick, onDashboardClick, onLogoClick }) => {
   const location = useLocation();
 
   return (
@@ -44,7 +44,7 @@ const Navbar = ({ isAuthenticated, onLogout, onLoginClick, onSignupClick, onDash
           <div className="nav-actions">
             {isAuthenticated ? (
               <div className="user-profile">
-                <span className="welcome-text">Hi, User</span>
+                <span className="welcome-text">Hi, {username || 'User'}</span>
                 <button className="logout-btn" onClick={onLogout}>
                   Logout
                 </button>

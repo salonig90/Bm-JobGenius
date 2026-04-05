@@ -14,6 +14,7 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [pendingRedirect, setPendingRedirect] = useState(null);
@@ -37,16 +38,53 @@ function AppContent() {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    const savedUsername = localStorage.getItem('username');
     if (token) {
       setIsAuthenticated(true);
+      if (savedUsername) setUsername(savedUsername);
+      
+      // Fetch user's saved resume data on page refresh if authenticated
+      fetchUserResumeData(token);
     }
   }, []);
+
+  const fetchUserResumeData = async (token) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/resume/my-resume/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const resumeName = result.data.file ? result.data.file.split('/').pop() : 'Saved Resume';
+        
+        setAnalysisData(prev => ({
+          ...prev,
+          resumeId: result.data.id || null,
+          extractedSkills: result.extracted_skills || [],
+          matchScore: result.score || 0,
+          scoreLabel: result.score_label || '',
+          resumeName: resumeName,
+          isFetchingJobs: false
+        }));
+        
+        if (result.data.id) {
+          fetchJobRecommendations(result.data.id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch saved resume:', error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
     localStorage.removeItem('analysis_data');
     setIsAuthenticated(false);
+    setUsername('');
     setAnalysisData({
       resumeId: null,
       matchScore: 0,
@@ -62,35 +100,15 @@ function AppContent() {
 
   const handleLoginSuccess = async () => {
     setIsAuthenticated(true);
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername) setUsername(savedUsername);
     setShowLogin(false);
     setShowSignup(false);
 
     // Fetch user's saved resume data
-    try {
-      const response = await fetch('http://localhost:8000/api/resume/my-resume/', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        setAnalysisData({
-          resumeId: result.data.id || null,
-          extractedSkills: result.extracted_skills || [],
-          matchScore: result.score || 0,
-          scoreLabel: result.score_label || '',
-          resumeName: result.data.file ? result.data.file.split('/').pop() : 'Saved Resume',
-          jobRecommendations: [],
-          aiSuggestions: null,
-          isFetchingJobs: false
-        });
-        
-        if (result.data.id) {
-          fetchJobRecommendations(result.data.id);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch saved resume:', error);
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      fetchUserResumeData(token);
     }
     
     if (pendingRedirect) {
@@ -143,6 +161,7 @@ function AppContent() {
       </div>
       <Navbar
         isAuthenticated={isAuthenticated}
+        username={username}
         onLogout={handleLogout}
         onLoginClick={() => setShowLogin(true)}
         onSignupClick={() => setShowSignup(true)}

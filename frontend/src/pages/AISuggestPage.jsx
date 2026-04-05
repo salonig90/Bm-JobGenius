@@ -97,12 +97,49 @@ const AISuggestPage = ({ isAuthenticated, analysisData, setAnalysisData }) => {
   }
 
   const formatSuggestion = (text) => {
-    // Matches patterns like "1. **Title**: Description" or "**Title**: Description" or "Title: Description"
-    const regex = /^(\d+\.\s*)?(\*\*)?(.*?)\2?:\s*(.*)/;
+    // Robust regex to capture: optional number, bold title, and description
+    // Example: "1. **Title**: Description" or "**Title**: Description"
+    // We look for the FIRST bold title and use it as the header
+    const regex = /^(\d+\.\s*)?\*\*(.*?)\*\*[:\-]?\s*(.*)/;
     const match = text.match(regex);
 
     if (match) {
-      const [_, number = '', __, title, description] = match;
+      const [_, number = '', title, description] = match;
+      return (
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <div style={{ marginTop: '5px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="var(--accent)" opacity="0.8" />
+            </svg>
+          </div>
+          <div>
+            <strong style={{ 
+              color: 'var(--accent)', 
+              fontSize: '1.25rem', 
+              display: 'inline-block', 
+              marginBottom: '12px', 
+              fontWeight: '700',
+              letterSpacing: '0.02em'
+            }}>{title}</strong>
+            <div style={{ 
+              color: 'var(--text-muted)', 
+              fontSize: '1rem', 
+              lineHeight: '1.7', 
+              textAlign: 'justify',
+              opacity: '0.9'
+            }}>
+              {description}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Fallback: If no bold marks, try matching by colon/dash
+    const fallbackRegex = /^(\d+\.\s*)?([^:\-]+)[:\-]\s*(.*)/;
+    const fallbackMatch = text.match(fallbackRegex);
+    if (fallbackMatch) {
+      const [_, number = '', title, description] = fallbackMatch;
       return (
         <div style={{ display: 'flex', gap: '15px' }}>
           <div style={{ marginTop: '5px' }}>

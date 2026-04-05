@@ -48,33 +48,20 @@ class JobRecommendationView(APIView):
             # Step 3: Fetch live jobs using job_fetcher
             live_jobs = []
             try:
-                # Always force location to India as per user requirement
-                # Increased results_count to ensure we get a diverse set from all sources
+                # Optimized live fetch for speed
                 live_jobs = fetcher.fetch_live_jobs(
                     search_term=search_query,
                     location="India",
-                    results_count=20
+                    results_count=10 # Reduced from 20 for faster response
                 )
             except Exception as e:
                 print(f"[JobRec] Live fetch failed: {e}")
 
-            # Fallback search if first query failed
-            if not live_jobs:
-                print(f"[JobRec] No results for '{search_query}', trying broad fallback in India...")
-                try:
-                    live_jobs = fetcher.fetch_live_jobs(
-                        search_term="Software Engineer",
-                        location="India",
-                        results_count=20
-                    )
-                except Exception as e:
-                    print(f"[JobRec] Fallback live fetch failed: {e}")
-
             # Step 4: Final Fallback to seeded Database if no live jobs found
             source = "live"
             if not live_jobs:
-                print("[JobRec] All live fetches failed. Falling back to seeded database...")
-                db_jobs = Job.objects.all()[:40] # Get up to 40 seeded jobs
+                print("[JobRec] Live fetch returned no results. Falling back to seeded database...")
+                db_jobs = Job.objects.all()[:20] # Get up to 20 seeded jobs
                 live_jobs = [
                     {
                         "title": job.title,
@@ -98,7 +85,7 @@ class JobRecommendationView(APIView):
             scored_jobs = recommender.score_live_jobs(
                 resume_text=resume_instance.full_text,
                 live_jobs=live_jobs,
-                top_n=40 # Return more recommendations
+                top_n=10 # Match the results_count for consistency
             )
 
             return Response({
