@@ -98,7 +98,7 @@ JobGenius provides a comprehensive RESTful API. A Postman collection is included
 
 1. **Upload**: Users upload their resume in PDF or DOCX format.
 2. **Parse & Analyze**: The backend extracts text using PyPDF2/python-docx and identifies skills using Spacy.
-3. **AI Scoring**: Gemini AI evaluates the resume's technical depth, sentiment, and career alignment.
+3. **AI Scoring**: Gemini AI evaluates the resume's technical depth and career alignment.
 4. **Vectorization**: The processed profile is converted into a vector embedding.
 5. **Matching**: JobSpy fetches live jobs, which are then ranked against the user's profile using ChromaDB's cosine similarity.
 6. **Insight**: The user receives a detailed dashboard with suggestions and relevant job links.

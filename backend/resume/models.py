@@ -12,7 +12,6 @@ class Resume(models.Model):
     full_text = models.TextField(blank=True, null=True)
     extracted_skills = models.TextField(blank=True, null=True)
     compatibility_score = models.IntegerField(default=0)
-    resume_sentiment = models.CharField(max_length=50, blank=True, null=True)  # FinBERT sentiment
 
     def __str__(self):
         return f"Resume {self.id} - {self.file.name}"

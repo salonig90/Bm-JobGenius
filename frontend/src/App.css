@@ -1474,48 +1474,6 @@ body {
   letter-spacing: 0.1em;
 }
 
-.sentiment-insight {
-  width: 100%;
-}
-
-.insight-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.insight-header h4 {
-  font-size: 1rem;
-  margin: 0;
-}
-
-.sentiment-pill {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 2rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-
-.sentiment-pill.strong-match, .sentiment-pill.positive {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--success);
-}
-
-.sentiment-pill.neutral {
-  background: rgba(148, 163, 184, 0.1);
-  color: var(--text-muted);
-}
-
-.insight-text {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
 .skills-grid-container {
   display: flex;
   flex-direction: column;
