@@ -2,6 +2,7 @@
 
 JobGenius is a sophisticated, AI-driven career intelligence platform that helps professionals optimize their resumes and discover the best-fitting job opportunities. By leveraging **Google Gemini AI** and **Semantic Vector Search**, JobGenius provides deep technical insights, actionable career advice, and hyper-relevant job matches from live sources.
 
+🌐 **Live Demo**: [https://jobgenius.duckdns.org/](https://jobgenius.duckdns.org/)
 
 ## 🌟 Key Features
 
@@ -22,6 +23,7 @@ JobGenius is a sophisticated, AI-driven career intelligence platform that helps 
 - **Document Processing**: PyPDF2, python-docx
 - **Job Discovery**: python-jobspy (Live scraping from LinkedIn/Google)
 - **Database**: SQLite (Development) / PostgreSQL (Production ready)
+- **Deployment**: Gunicorn, Nginx, systemd (Production)
 
 ### **Frontend (React)**
 - **Framework**: React 19 with Vite
@@ -70,6 +72,15 @@ npm install
 npm run dev
 ```
 The application will be available at `http://localhost:5173`.
+
+## 🌐 Deployment & DevOps
+
+The project is fully production-ready and deployed with a modern DevOps stack:
+
+- **Web Server**: **Nginx** acts as a reverse proxy, handling SSL termination and static file serving.
+- **App Server**: **Gunicorn** (Green Unicorn) serves as the WSGI HTTP Server for the Django application.
+- **Process Management**: **systemd** ensures the application is always running and automatically restarts it on failure or reboot.
+- **CI/CD Pipeline**: Integrated with a robust CI/CD pipeline for automated testing and deployment, ensuring high availability and seamless updates.
 
 ## 🔌 API Reference & Testing
 
