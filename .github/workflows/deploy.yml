@@ -1,44 +1,44 @@
 name: Deploy Project
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
-
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-
           script: |
             echo "Deployment started"
-
             cd /home/salonig/Bm-JobGenius
 
+            # Pull latest code
             git pull origin main
 
+            # Backend
             cd backend
             source venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r requirements.txt --no-deps
             python manage.py migrate --noinput
-
+            python manage.py collectstatic --noinput
             sudo systemctl restart gunicorn
 
+            # Frontend
             cd ../frontend
             npm install
             npm run build
 
-            sudo rm -rf /var/www/jobgenius/*
-            sudo cp -r dist/* /var/www/jobgenius/
+            # Copy to correct Nginx path
+            sudo mkdir -p /var/www/jobgenius/frontend/dist
+            sudo rm -rf /var/www/jobgenius/frontend/dist/*
+            sudo cp -r dist/. /var/www/jobgenius/frontend/dist/
+            sudo chown -R www-data:www-data /var/www/jobgenius/
+            sudo chmod -R 755 /var/www/jobgenius/
 
-            sudo systemctl restart nginx
-
-            echo "Deployment completed"
+            sudo systemctl reload nginx
+            echo "Deployment completed successfully"
